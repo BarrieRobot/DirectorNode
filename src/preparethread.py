@@ -6,7 +6,7 @@ import threading
 import director
 import publisher
 from order_queue import order_queue
-from DirectorNode.msg import Order
+from director_node.msg import Order
 from barrieduino.msg import ledRing # order message
 from barrieduino.msg import HSL # order message
 

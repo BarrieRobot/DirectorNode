@@ -8,7 +8,7 @@ import time
 from barrieduino.msg import activateOrder # order message to arduino
 from barrieduino.msg import ledRing #
 from barrieduino.msg import diaphragm #
-from DirectorNode.msg import Order # order message from UDPNode
+from director_node.msg import Order # order message from UDPNode
 
 # ID = Drink
 # 0 = Koffie
