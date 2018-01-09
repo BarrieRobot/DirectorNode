@@ -12,6 +12,7 @@ from DirectorNode.msg import Order # order message from UDPNode
 
 # ID = Drink
 # 0 = Koffie
+# 1 = Cappuchino
 # 1 = Cola
 # 2 = Fanta
 # 3 =
@@ -31,8 +32,6 @@ def order_received_callback(message):
         order_queue.put((message.order_type, hotring))
     else:
         rospy.loginfo("Error unrecognised drink ordered: " + str(message.order_type))
-    print(str(order_queue.qsize()))
-
 
 def setup_subscriber():
     rospy.Subscriber('orders', Order, order_received_callback)

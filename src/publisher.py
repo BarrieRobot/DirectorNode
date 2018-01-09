@@ -58,6 +58,15 @@ class Publisher():
 
         self.order_pub.publish(order_msg)
 
+    def move_to_start(self, lane):
+        """
+        Moves the transporter back to its original zero position
+        """
+        move_msg = Move()
+        move_msg.lane = lane
+        move_msg.location = 0 # 0: back to start
+        self.move_pub.publish(move_msg)
+
     def go_to_coffee_machine(self):
         """
         Moves cup to the coffee machine
@@ -85,5 +94,29 @@ class Publisher():
         move_msg.location = 2
         self.move_pub.publish(move_msg)
 
-    def move_to_diaphragm(self):
-        pass
+    def open_diaphragm(self, lane):
+        """
+        Opens the diaphragm
+        """
+        msg = diaphragm()
+        msg.diaphragm = lane
+        msg.position = True
+        self.diaphragm_pub.publish(msg)
+
+    def close_diaphragm(self, lane):
+        """
+        Closes the diaphragm
+        """
+        msg = diaphragm()
+        msg.diaphragm = lane
+        msg.position = True
+        self.diaphragm_pub.publish(msg)
+
+    def move_through_diaphragm(self, lane):
+        """
+        Moves the item through the diaphragm, assumed diaphragm is open
+        """
+        move_msg = Move()
+        move_msg.lane = lane
+        move_msg.location = 3 # 3: presentation
+        self.move_pub.publish(move_msg)
