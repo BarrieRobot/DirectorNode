@@ -8,22 +8,23 @@ import publisher
 from led_updater import LEDUpdater
 from order_queue import order_queue
 from director_node.msg import Order
-from barrieduino.msg import ledRing # order message
-from barrieduino.msg import HSL # order message
 from barrieduino.msg import ledRing
 from barrieduino.msg import HSL
 
-delay_drop_cup = 2
-delay_drop_can = 2
-delay_move_to_coffeemachine = 2
-delay_move_coffee_diaphragm = 3
-delay_move_soda_diaphragm = 3
-delay_move_fuly_down = 1.5
-delay_back_to_start1 = 1
-delay_back_to_start2 = 3
-delay_dispense_coffee = 3
-delay_move_to_pre_present = 5
-delay_present_through_diaphragm = 3
+delay_drop_cup = 10
+delay_drop_can = 10
+delay_move_to_coffeemachine = 20
+delay_move_coffee_diaphragm = 60
+delay_move_soda_diaphragm = 30
+delay_move_fuly_down = 5
+delay_back_to_start1 = 5
+delay_back_to_start2 = 10
+delay_dispense_coffee = 30
+delay_open_diaphragm = 10
+delay_present_through_diaphragm = 10
+
+total_hot_time = delay_drop_cup + delay_move_to_coffeemachine + delay_move_coffee_diaphragm + delay_back_to_start1 + delay_back_to_start2 + delay_dispense_coffee + delay_present_through_diaphragm
+total_cold_time = delay_drop_can + delay_move_soda_diaphragm + delay_move_fuly_down + delay_back_to_start1 + delay_back_to_start2 + delay_present_through_diaphragm
 
 class PrepareThread (threading.Thread):
 
@@ -36,63 +37,63 @@ class PrepareThread (threading.Thread):
 
     def prepare_hot(self, drink):
         # prepare cup
-        rospy.loginfo("Dropping cup")
         updater = LEDUpdater(director.hotring, total_hot_time)
         updater.start()
+        rospy.loginfo("Dropping cup " + str(delay_drop_cup))
         self.publisher.send_drop_cup()
         time.sleep(delay_drop_cup)
         rospy.loginfo("Cup dropped")
         # move to coffee machine
-        rospy.loginfo("Going to coffee machine")
+        rospy.loginfo("Going to coffee machine " + str(delay_move_to_coffeemachine))
         self.publisher.go_to_coffee_machine()
         time.sleep(delay_move_to_coffeemachine)
         rospy.loginfo("At coffee machine")
         # dispense coffee
-        rospy.loginfo("Dispensing drink")
-        self.publisher.dispense_drink(drink)
+        rospy.loginfo("Dispensing drink " + str(delay_dispense_coffee))
+        self.publisher.dispense_drink(director.hotring, drink)
         time.sleep(delay_dispense_coffee)
         rospy.loginfo("Dispensed drink")
         # move to endstop
-        rospy.loginfo("Moving to pre-present")
+        rospy.loginfo("Moving to pre-present " + str(delay_move_coffee_diaphragm))
         self.publisher.pre_present(director.hotring)
-        time.sleep(delay_move_to_pre_present)
+        time.sleep(delay_move_coffee_diaphragm)
         rospy.loginfo("At pre-present")
         # open diaphragm
-        rospy.loginfo("Opening diaphragm")
+        rospy.loginfo("Opening diaphragm " + str(delay_open_diaphragm))
         self.publisher.open_diaphragm(director.hotring)
         time.sleep(delay_open_diaphragm)
         rospy.loginfo("Opened diaphragm")
         #Move through diaphragm
-        rospy.loginfo("Presenting..")
+        rospy.loginfo("Presenting.. " + str(delay_present_through_diaphragm))
         self.publisher.open_diaphragm(director.hotring)
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
 
     def prepare_cold(self, drink):
         # dispense can
-        rospy.loginfo("Dropping can")
-        self.publisher.dispense_drink(drink)
         updater = LEDUpdater(director.coldring, total_cold_time)
         updater.start()
+        rospy.loginfo("Dropping can " + str(delay_drop_can))
+        self.publisher.dispense_drink(director.coldring, 0) #TODO CORRECT DRINK!
         time.sleep(delay_drop_can)
         rospy.loginfo("Can dropped")
         # move down transporter
-        rospy.loginfo("Locking in can")
+        rospy.loginfo("Locking in can " + str(delay_move_fuly_down))
         self.publisher.lock_in_soda_can()
         time.sleep(delay_move_fuly_down)
         rospy.loginfo("Can locked in")
         # move up transporter
-        rospy.loginfo("Moving to pre-present")
+        rospy.loginfo("Moving to pre-present " + str(delay_move_soda_diaphragm))
         self.publisher.pre_present(drink)
         time.sleep(delay_move_soda_diaphragm)
         rospy.loginfo("At pre-present")
         # open diaphragmn
-        rospy.loginfo("Opening diaphragm")
+        rospy.loginfo("Opening diaphragm" + str(delay_open_diaphragm))
         self.publisher.open_diaphragm(director.coldring)
         time.sleep(delay_open_diaphragm)
         rospy.loginfo("Opened diaphragm")
         #Move through diaphragm
-        rospy.loginfo("Presenting..")
+        rospy.loginfo("Presenting.. " + str(delay_present_through_diaphragm))
         self.publisher.open_diaphragm(director.coldring)
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
@@ -104,6 +105,7 @@ class PrepareThread (threading.Thread):
         self.publisher.close_diaphragm(lane)
         time.sleep(delay_back_to_start2)
         rospy.loginfo("Back at begin position")
+        self.publisher.send_order_complete()
 
     def prepare_item(self, ( item, ring )):
         print("starts thread for drink " + str(item))
@@ -115,12 +117,6 @@ class PrepareThread (threading.Thread):
             self.reset_to_starting_position(director.coldring)
         # time.sleep(10)
         print("finishes thread for drink " + str(item))
-        # prepare can or cup
-        # fill
-        # transport
-        # led update
-        # open iris
-        # reset all
 
     def run(self):
         while True:
@@ -129,5 +125,5 @@ class PrepareThread (threading.Thread):
                 self.prepare_item(item)
                 order_queue.task_done()
             else:
-                rospy.loginfo("waiting for order")
+                # rospy.loginfo("waiting for order")
                 time.sleep(1)

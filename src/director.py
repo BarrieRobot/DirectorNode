@@ -13,13 +13,14 @@ from director_node.msg import Order # order message from UDPNode
 # ID = Drink
 # 0 = Koffie
 # 1 = Cappuchino
-# 1 = Cola
-# 2 = Fanta
-# 3 =
-# Order of prices in database is leading
+# 2 = Heet water
+# 3 = Caffee au lait
+# 4 = Minute Maid
+# 5 = Cola
+# 6 = Fanta
 
-cold = [ 1, 2, 3 ]
-hot = [ 0 ]
+cold = [ 4, 5, 6 ]
+hot = [ 0, 1, 2, 3 ]
 
 hotring = 1
 coldring = 2

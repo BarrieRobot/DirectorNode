@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 import rospy
 from barrieduino.msg import activateOrder # order message
+from director_node.msg import Order
 from barrieduino.msg import ledRing # ledring message
 from barrieduino.msg import HSL # HSL (color) message
 from barrieduino.msg import diaphragm # diaphragm message
 from barrieduino.msg import Move
+import director
 
 hot = 1
 cold = 2
@@ -13,8 +15,12 @@ class Publisher():
     def __init__(self):
         self.led_pub = rospy.Publisher('LED_progress', ledRing, queue_size=10)
         self.order_pub = rospy.Publisher('activateOrder', activateOrder, queue_size=10)
-        self.diaphragm_pub = rospy.Publisher('diaphragm', activateOrder, queue_size=10)
+        self.order_complete_pub = rospy.Publisher('finishedOrders', Order, queue_size=10)
+        self.diaphragm_pub = rospy.Publisher('diaphragm', diaphragm, queue_size=10)
         self.move_pub = rospy.Publisher('Move', Move, queue_size=10)
+
+    def send_order_complete(self):
+        self.order_complete_pub.publish(Order(255))
 
     def send_led_progress(self, ring, progress, hsl = (255,255,255)):
         """
@@ -43,18 +49,13 @@ class Publisher():
         order_msg.selection = drink # Undefined!
         self.order_pub.publish(order_msg)
 
-    def dispense_drink(self, drinkid):
+    def dispense_drink(self, lane, selection):
         """
-        Sends correct message to dispense coffee or a soda based on the drinkid
-        (given by order in the database and enum in the GUI)
+
         """
         order_msg = activateOrder()
-        if drinkid in director.cold:
-            order_msg.order_type = hot # 1: hot drink
-            order_msg.selection = 0 #TODO: TBD
-        else:
-            order_msg.order_type = cold # 2: cold drink
-            order_msg.selection = 0 #TODO: TBD
+        order_msg.order_type = lane
+        order_msg.selection = selection
 
         self.order_pub.publish(order_msg)
 
@@ -72,7 +73,7 @@ class Publisher():
         Moves cup to the coffee machine
         """
         move_msg = Move()
-        move_msg.lane = hot
+        move_msg.lane = director.hot
         move_msg.location = 1 # 1: under coffee machine
         self.move_pub.publish(move_msg)
 
@@ -81,7 +82,7 @@ class Publisher():
         Locks soda can in transporter by moving it down to the lowest position
         """
         move_msg = Move()
-        move_msg.lane = cold
+        move_msg.lane = director.cold
         move_msg.location = 1 # 1: fully down
         self.move_pub.publish(move_msg)
 
