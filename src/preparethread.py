@@ -5,10 +5,13 @@ import os
 import threading
 import director
 import publisher
+from led_updater import LEDUpdater
 from order_queue import order_queue
 from director_node.msg import Order
 from barrieduino.msg import ledRing # order message
 from barrieduino.msg import HSL # order message
+from barrieduino.msg import ledRing
+from barrieduino.msg import HSL
 
 delay_drop_cup = 2
 delay_drop_can = 2
@@ -34,6 +37,8 @@ class PrepareThread (threading.Thread):
     def prepare_hot(self, drink):
         # prepare cup
         rospy.loginfo("Dropping cup")
+        updater = LEDUpdater(director.hotring, total_hot_time)
+        updater.start()
         self.publisher.send_drop_cup()
         time.sleep(delay_drop_cup)
         rospy.loginfo("Cup dropped")
@@ -67,6 +72,8 @@ class PrepareThread (threading.Thread):
         # dispense can
         rospy.loginfo("Dropping can")
         self.publisher.dispense_drink(drink)
+        updater = LEDUpdater(director.coldring, total_cold_time)
+        updater.start()
         time.sleep(delay_drop_can)
         rospy.loginfo("Can dropped")
         # move down transporter
@@ -102,10 +109,10 @@ class PrepareThread (threading.Thread):
         print("starts thread for drink " + str(item))
         if (ring is director.hotring):
             self.prepare_hot(item)
-            reset_to_starting_position(director.hotring)
+            self.reset_to_starting_position(director.hotring)
         elif (ring is director.coldring):
             self.prepare_cold(item)
-            reset_to_starting_position(director.coldring)
+            self.reset_to_starting_position(director.coldring)
         # time.sleep(10)
         print("finishes thread for drink " + str(item))
         # prepare can or cup
