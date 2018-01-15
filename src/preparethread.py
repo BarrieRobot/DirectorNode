@@ -68,6 +68,7 @@ class PrepareThread (threading.Thread):
         self.publisher.open_diaphragm(director.hotring)
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
+        self.publisher.send_order_complete()
 
     def prepare_cold(self, drink):
         # dispense can
@@ -97,6 +98,7 @@ class PrepareThread (threading.Thread):
         self.publisher.open_diaphragm(director.coldring)
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
+        self.publisher.send_order_complete()
 
     def reset_to_starting_position(self, lane):
         rospy.loginfo("Going back to begin position")
@@ -105,7 +107,6 @@ class PrepareThread (threading.Thread):
         self.publisher.close_diaphragm(lane)
         time.sleep(delay_back_to_start2)
         rospy.loginfo("Back at begin position")
-        self.publisher.send_order_complete()
 
     def prepare_item(self, ( item, ring )):
         print("starts thread for drink " + str(item))
