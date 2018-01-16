@@ -4,6 +4,7 @@
     <node pkg="udpnode" name="udpnode" type="udpnode.py"/>
     <node pkg="director_node" name="director" type="director.py"/>
     <node pkg="kt" name="kinecttouch" type="kt"/>
+    <node pkg="rosserial_python" name="rosserial" type="serial_node.py" args="/dev/ttyUSB0" />
   </group>
 
 </launch>
