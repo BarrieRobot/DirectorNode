@@ -22,7 +22,7 @@ class LEDUpdater (threading.Thread):
         t0 = time.time()
         t1 = time.time()
         while(t1 - t0 < self.time):
-            print(((t1-t0) / self.time) * 1000)
+            #print(((t1-t0) / self.time) * 1000)
             self.publisher.publish(ledRing(self.ring, mode_progress, ((t1-t0) / self.time) * 1000, HSL(100,250,200)))
             time.sleep(send_delay)
             t1 = time.time()

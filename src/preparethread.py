@@ -13,9 +13,9 @@ from barrieduino.msg import HSL
 
 delay_drop_cup = 10
 delay_drop_can = 10
-delay_move_to_coffeemachine = 20
-delay_move_coffee_diaphragm = 60
-delay_move_soda_diaphragm = 30
+delay_move_to_coffeemachine = 10
+delay_move_coffee_diaphragm = 40
+delay_move_soda_diaphragm = 15
 delay_move_fuly_down = 5
 delay_back_to_start1 = 5
 delay_back_to_start2 = 10
@@ -65,7 +65,7 @@ class PrepareThread (threading.Thread):
         rospy.loginfo("Opened diaphragm")
         #Move through diaphragm
         rospy.loginfo("Presenting.. " + str(delay_present_through_diaphragm))
-        self.publisher.open_diaphragm(director.hotring)
+        self.publisher.move_through_diaphragm(director.hotring)
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
         self.publisher.send_order_complete()
@@ -85,7 +85,7 @@ class PrepareThread (threading.Thread):
         rospy.loginfo("Can locked in")
         # move up transporter
         rospy.loginfo("Moving to pre-present " + str(delay_move_soda_diaphragm))
-        self.publisher.pre_present(drink)
+        self.publisher.pre_present(director.coldring)
         time.sleep(delay_move_soda_diaphragm)
         rospy.loginfo("At pre-present")
         # open diaphragmn
@@ -95,7 +95,7 @@ class PrepareThread (threading.Thread):
         rospy.loginfo("Opened diaphragm")
         #Move through diaphragm
         rospy.loginfo("Presenting.. " + str(delay_present_through_diaphragm))
-        self.publisher.open_diaphragm(director.coldring)
+        self.publisher.move_through_diaphragm(director.coldring)
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
         self.publisher.send_order_complete()

@@ -17,7 +17,7 @@ class Publisher():
         self.order_pub = rospy.Publisher('activateOrder', activateOrder, queue_size=10)
         self.order_complete_pub = rospy.Publisher('finishedOrders', Order, queue_size=10)
         self.diaphragm_pub = rospy.Publisher('diaphragm', diaphragm, queue_size=10)
-        self.move_pub = rospy.Publisher('Move', Move, queue_size=10)
+        self.move_pub = rospy.Publisher('barrie_movement', Move, queue_size=10)
 
     def send_order_complete(self):
         self.order_complete_pub.publish(Order(255))
@@ -73,7 +73,7 @@ class Publisher():
         Moves cup to the coffee machine
         """
         move_msg = Move()
-        move_msg.lane = director.hot
+        move_msg.lane = director.hotring
         move_msg.location = 1 # 1: under coffee machine
         self.move_pub.publish(move_msg)
 
@@ -82,7 +82,7 @@ class Publisher():
         Locks soda can in transporter by moving it down to the lowest position
         """
         move_msg = Move()
-        move_msg.lane = director.cold
+        move_msg.lane = director.coldring
         move_msg.location = 1 # 1: fully down
         self.move_pub.publish(move_msg)
 
