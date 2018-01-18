@@ -11,16 +11,16 @@ from director_node.msg import Order
 from barrieduino.msg import ledRing
 from barrieduino.msg import HSL
 
-delay_drop_cup = 10
+delay_drop_cup = 7
 delay_drop_can = 10
-delay_move_to_coffeemachine = 10
-delay_move_coffee_diaphragm = 40
-delay_move_soda_diaphragm = 15
+delay_move_to_coffeemachine = 5
+delay_move_coffee_diaphragm = 12
+delay_move_soda_diaphragm = 7
 delay_move_fuly_down = 5
 delay_back_to_start1 = 5
 delay_back_to_start2 = 10
-delay_dispense_coffee = 30
-delay_open_diaphragm = 10
+delay_dispense_coffee = 15
+delay_open_diaphragm = 3
 delay_present_through_diaphragm = 10
 
 total_hot_time = delay_drop_cup + delay_move_to_coffeemachine + delay_move_coffee_diaphragm + delay_back_to_start1 + delay_back_to_start2 + delay_dispense_coffee + delay_present_through_diaphragm
@@ -66,9 +66,9 @@ class PrepareThread (threading.Thread):
         #Move through diaphragm
         rospy.loginfo("Presenting.. " + str(delay_present_through_diaphragm))
         self.publisher.move_through_diaphragm(director.hotring)
+        self.publisher.send_order_complete()
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
-        self.publisher.send_order_complete()
 
     def prepare_cold(self, drink):
         # dispense can
@@ -96,9 +96,9 @@ class PrepareThread (threading.Thread):
         #Move through diaphragm
         rospy.loginfo("Presenting.. " + str(delay_present_through_diaphragm))
         self.publisher.move_through_diaphragm(director.coldring)
+        self.publisher.send_order_complete()
         time.sleep(delay_present_through_diaphragm)
         rospy.loginfo("Presented")
-        self.publisher.send_order_complete()
 
     def reset_to_starting_position(self, lane):
         rospy.loginfo("Going back to begin position")
